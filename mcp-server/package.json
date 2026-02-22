@@ -1,0 +1,24 @@
+{
+    "name": "stardew-mcp-bridge",
+    "version": "0.1.0",
+    "description": "MCP server bridging AI agents to Stardew Valley via SMAPI.",
+    "main": "build/index.js",
+    "files": [
+        "build"
+    ],
+    "bin": {
+        "stardew-mcp-bridge": "./build/index.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "watch": "tsc -w",
+        "prepublishOnly": "npm run build"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.0.1"
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.24",
+        "typescript": "^5.3.3"
+    }
+}
