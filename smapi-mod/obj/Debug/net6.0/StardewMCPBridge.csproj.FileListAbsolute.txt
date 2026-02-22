@@ -1,0 +1,9 @@
+D:\Mai's Wonderland\infrastructure\stardew-mcp-bridge\smapi-mod\bin\Debug\net6.0\StardewMCPBridge.deps.json
+D:\Mai's Wonderland\infrastructure\stardew-mcp-bridge\smapi-mod\bin\Debug\net6.0\StardewMCPBridge.dll
+D:\Mai's Wonderland\infrastructure\stardew-mcp-bridge\smapi-mod\obj\Debug\net6.0\StardewMCPBridge.csproj.AssemblyReference.cache
+D:\Mai's Wonderland\infrastructure\stardew-mcp-bridge\smapi-mod\obj\Debug\net6.0\StardewMCPBridge.GeneratedMSBuildEditorConfig.editorconfig
+D:\Mai's Wonderland\infrastructure\stardew-mcp-bridge\smapi-mod\obj\Debug\net6.0\StardewMCPBridge.AssemblyInfoInputs.cache
+D:\Mai's Wonderland\infrastructure\stardew-mcp-bridge\smapi-mod\obj\Debug\net6.0\StardewMCPBridge.AssemblyInfo.cs
+D:\Mai's Wonderland\infrastructure\stardew-mcp-bridge\smapi-mod\obj\Debug\net6.0\StardewMCPBridge.csproj.CoreCompileInputs.cache
+D:\Mai's Wonderland\infrastructure\stardew-mcp-bridge\smapi-mod\obj\Debug\net6.0\StardewMCPBridge.sourcelink.json
+D:\Mai's Wonderland\infrastructure\stardew-mcp-bridge\smapi-mod\obj\Debug\net6.0\StardewMCPBridge.dll

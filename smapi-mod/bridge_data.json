@@ -1,0 +1,29 @@
+{
+  "time": 730,
+  "location": "Farm",
+  "player": {
+    "name": "Mai",
+    "health": 100,
+    "position": {
+      "x": 4375.5176,
+      "y": 1757.3539
+    }
+  },
+  "npcs": [
+    {
+      "name": "Kai",
+      "position": {
+        "x": 4096,
+        "y": 1245.2797
+      }
+    },
+    {
+      "name": "Lucian",
+      "position": {
+        "x": 4096,
+        "y": 1245.2797
+      }
+    }
+  ],
+  "syncedAt": "2026-02-21T13:13:08.8375607Z"
+}

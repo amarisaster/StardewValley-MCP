@@ -1,0 +1,10 @@
+{
+    "Name": "Stardew MCP Bridge",
+    "Author": "Antigravity",
+    "Version": "0.1.0",
+    "Description": "Bridges Stardew Valley game state and actions to an external AI-controlled MCP server.",
+    "UniqueID": "Antigravity.StardewMCPBridge",
+    "EntryDll": "StardewMCPBridge.dll",
+    "MinimumApiVersion": "4.0.0",
+    "UpdateKeys": []
+}

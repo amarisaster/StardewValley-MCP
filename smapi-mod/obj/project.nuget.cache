@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "8v/9ngUfjQLk5xM5kZsyINsJ3iksERZLIOIttFTORSnwSjr77/lgJabvqx9gAkt5WZrFp5eUYWSlgSqSgBz/BA==",
+  "success": true,
+  "projectFilePath": "D:\\Mai's Wonderland\\infrastructure\\stardew-mcp-bridge\\smapi-mod\\StardewMCPBridge.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\AMD\\.nuget\\packages\\pathoschild.stardew.modbuildconfig\\4.1.1\\pathoschild.stardew.modbuildconfig.4.1.1.nupkg.sha512",
+    "C:\\Users\\AMD\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.31\\microsoft.netcore.app.ref.6.0.31.nupkg.sha512",
+    "C:\\Users\\AMD\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.31\\microsoft.windowsdesktop.app.ref.6.0.31.nupkg.sha512",
+    "C:\\Users\\AMD\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.31\\microsoft.aspnetcore.app.ref.6.0.31.nupkg.sha512"
+  ],
+  "logs": []
+}
