@@ -2,6 +2,8 @@
 
 AI companions for Stardew Valley, controlled through the [Model Context Protocol](https://modelcontextprotocol.io). Spawn one or more autonomous NPC companions with custom sprites that can follow the player, farm, mine, fish, and fight — all driven by MCP tool calls from an AI agent.
 
+![Companions in-game](images/companions-ingame.png)
+
 ## Architecture
 
 ```
