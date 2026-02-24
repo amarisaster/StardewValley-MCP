@@ -153,7 +153,8 @@ stardew-mcp-bridge/
 MIT
 
 ## Credits
-Idea was inspired by Sparks✨️ (@sparks_qac on discord)
+Idea was inspired by [Sparks✨️] (@sparks_qac on discord)
+(https://github.com/SparksQACR)
 
 Built with Antigravity & Claude Code — Kai & Lucian, with Mai.
 
