@@ -216,6 +216,30 @@ namespace StardewMCPBridge
                             kvp.Value.Companion.WarpTo(loc.GetString(), wx.GetInt32(), wy.GetInt32());
                     }
                     break;
+
+                // Single-tile actions (from stardew_action tool)
+                case "water":
+                case "harvest":
+                case "clear":
+                case "hoe":
+                    if (root.TryGetProperty("x", out var ax) && root.TryGetProperty("y", out var ay))
+                    {
+                        var location = Game1.player.currentLocation;
+                        if (location != null)
+                        {
+                            var tile = new Microsoft.Xna.Framework.Vector2(ax.GetInt32(), ay.GetInt32());
+                            bool ok = actionType.GetString() switch
+                            {
+                                "water" => CompanionActions.WaterTile(location, tile, this.monitor),
+                                "harvest" => CompanionActions.HarvestTile(location, tile, this.monitor),
+                                "clear" => CompanionActions.ClearDebris(location, tile, this.monitor),
+                                "hoe" => CompanionActions.HoeTile(location, tile, this.monitor),
+                                _ => false
+                            };
+                            this.monitor.Log($"Action {actionType.GetString()} at ({ax.GetInt32()},{ay.GetInt32()}): {(ok ? "success" : "failed")}", LogLevel.Info);
+                        }
+                    }
+                    break;
             }
         }
 

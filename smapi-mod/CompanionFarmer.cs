@@ -39,7 +39,6 @@ namespace StardewMCPBridge
             this.Shadow.Speed = 2;
             this.Shadow.Stamina = Farmer.startingStamina;
             this.Shadow.MaxItems = 36;
-            this.Shadow.Money = 0; // companions don't need their own money
 
             // Give initial tools
             var tools = Farmer.initialTools();
@@ -151,7 +150,6 @@ namespace StardewMCPBridge
             var monster = this.FindNearestMonster();
             if (monster == null) return false;
 
-            // Face the monster
             Vector2 monsterTile = monster.Tile;
             this.Shadow.FaceToward(monsterTile);
 
@@ -171,7 +169,7 @@ namespace StardewMCPBridge
             }
         }
 
-        /// <summary>Damage monsters in an area around the companion (fallback if weapon DoDamage fails).</summary>
+        /// <summary>Damage monsters in an area around the companion.</summary>
         public bool AreaAttack(int minDmg = 5, int maxDmg = 15)
         {
             this.SyncFromNpc();
@@ -242,7 +240,7 @@ namespace StardewMCPBridge
             {
                 var pos = this.Shadow.Position;
                 rod.beginUsing(this.Shadow.currentLocation, (int)pos.X, (int)pos.Y, this.Shadow);
-                rod.castingPower = 1f; // max distance
+                rod.castingPower = 1f;
                 this.monitor.Log($"{this.Name}: Cast fishing rod", LogLevel.Trace);
                 return true;
             }
@@ -251,6 +249,19 @@ namespace StardewMCPBridge
                 this.monitor.Log($"{this.Name}: Fishing cast failed: {ex.Message}", LogLevel.Warn);
                 return false;
             }
+        }
+
+        /// <summary>Tick the fishing rod's internal state machine so it progresses (cast → wait → nibble).</summary>
+        public void TickFishingRod()
+        {
+            var rod = this.Shadow.Items.FirstOrDefault(i => i is FishingRod) as FishingRod;
+            if (rod == null || Game1.currentGameTime == null) return;
+
+            try
+            {
+                rod.tickUpdate(Game1.currentGameTime, this.Shadow);
+            }
+            catch { /* rod update can throw during transitions */ }
         }
 
         /// <summary>Check if rod is nibbling and hook the fish.</summary>
@@ -275,7 +286,6 @@ namespace StardewMCPBridge
         /// <summary>Buy an item by directly adding to inventory and deducting from the player's money.</summary>
         public bool BuyItem(string qualifiedItemId, int quantity, int unitPrice)
         {
-            // Use the player's money since companions don't have their own economy
             int total = unitPrice * quantity;
             if (Game1.player.Money >= total)
             {
@@ -303,8 +313,9 @@ namespace StardewMCPBridge
                 return;
             }
 
-            // Remove NPC from old location
+            // Remove NPC from old location and clear stale pathfinding
             this.Visual.currentLocation?.characters.Remove(this.Visual);
+            this.Visual.controller = null;
 
             // Move both to new location
             var pos = new Vector2(tileX * 64f, tileY * 64f);
@@ -324,10 +335,5 @@ namespace StardewMCPBridge
             return this.Shadow.Stamina / this.Shadow.MaxStamina * 100f;
         }
 
-        /// <summary>Rest to recover stamina (simulated).</summary>
-        public void Rest(float amount = 10f)
-        {
-            this.Shadow.Stamina = Math.Min(this.Shadow.Stamina + amount, this.Shadow.MaxStamina);
-        }
     }
 }

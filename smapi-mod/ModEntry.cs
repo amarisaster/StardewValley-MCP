@@ -28,6 +28,8 @@ namespace StardewMCPBridge
 
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            helper.Events.GameLoop.DayStarted += this.OnDayStarted;
+            helper.Events.GameLoop.ReturnedToTitle += this.OnReturnedToTitle;
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
 
             this.Monitor.Log("Stardew MCP Bridge initialized. Content pipeline registered.", LogLevel.Debug);
@@ -92,15 +94,29 @@ namespace StardewMCPBridge
 
         private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
+            if (!Context.IsWorldReady) return;
+
+            // AI ticks every frame (60/sec) for responsive combat, pathfinding, stuck detection
+            this.botManager.Update();
+
+            // Bridge I/O every 30 ticks (~0.5s) to avoid thrashing disk
             if (e.IsMultipleOf(30))
             {
-                if (Context.IsWorldReady)
-                {
-                    this.SyncGameState();
-                    this.ProcessActions();
-                    this.botManager.Update();
-                }
+                this.SyncGameState();
+                this.ProcessActions();
             }
+        }
+
+        private void OnDayStarted(object sender, DayStartedEventArgs e)
+        {
+            this.botManager.OnDayStarted();
+            this.Monitor.Log("New day: companion stamina restored", LogLevel.Info);
+        }
+
+        private void OnReturnedToTitle(object sender, ReturnedToTitleEventArgs e)
+        {
+            this.botManager.Cleanup();
+            this.Monitor.Log("Returned to title: companions cleaned up", LogLevel.Info);
         }
 
         private void SyncGameState()
@@ -112,7 +128,7 @@ namespace StardewMCPBridge
                     time = Game1.timeOfDay,
                     day = Game1.dayOfMonth,
                     season = Game1.currentSeason,
-                    weather = Game1.isRaining ? "rain" : Game1.isSnowing ? "snow" : "sunny",
+                    weather = Game1.isLightning ? "storm" : Game1.isRaining ? "rain" : Game1.isSnowing ? "snow" : "sunny",
                     location = Game1.currentLocation?.Name,
                     player = new
                     {
@@ -131,7 +147,10 @@ namespace StardewMCPBridge
                 };
 
                 string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(this.bridgePath, json);
+                // Atomic write: temp file then rename, so MCP never reads partial JSON
+                string tmpPath = this.bridgePath + ".tmp";
+                File.WriteAllText(tmpPath, json);
+                File.Move(tmpPath, this.bridgePath, true);
             }
             catch (Exception ex)
             {
@@ -147,49 +166,32 @@ namespace StardewMCPBridge
                     return;
 
                 string json = File.ReadAllText(this.actionPath);
+
+                // Delete FIRST to avoid race: MCP writes new action between read and delete
+                File.Delete(this.actionPath);
+
                 if (string.IsNullOrWhiteSpace(json))
                     return;
 
                 using var doc = JsonDocument.Parse(json);
                 var root = doc.RootElement;
 
-                this.botManager.ProcessAction(json);
-
                 if (!root.TryGetProperty("actionType", out var actionType))
                     return;
 
-                switch (actionType.GetString())
+                // Route to bot manager for companion actions
+                this.botManager.ProcessAction(json);
+
+                // Handle chat separately (not a companion action)
+                if (actionType.GetString() == "chat")
                 {
-                    case "chat":
-                        if (root.TryGetProperty("metadata", out var meta) &&
-                            meta.TryGetProperty("message", out var msg))
-                        {
-                            Game1.chatBox?.addMessage(msg.GetString(), Microsoft.Xna.Framework.Color.Gold);
-                            this.Monitor.Log($"Chat sent: {msg.GetString()}", LogLevel.Info);
-                        }
-                        break;
-
-                    // Movement commands
-                    case "spawn":
-                    case "follow":
-                    case "stay":
-                        break;
-
-                    // Farm commands
-                    case "farm":
-                    case "water":
-                    case "harvest":
-                    case "clear":
-                    case "water_all":
-                    case "harvest_all":
-                        break;
-
-                    default:
-                        this.Monitor.Log($"Unknown action type: {actionType.GetString()}", LogLevel.Warn);
-                        break;
+                    if (root.TryGetProperty("metadata", out var meta) &&
+                        meta.TryGetProperty("message", out var msg))
+                    {
+                        Game1.chatBox?.addMessage(msg.GetString(), Microsoft.Xna.Framework.Color.Gold);
+                        this.Monitor.Log($"Chat sent: {msg.GetString()}", LogLevel.Info);
+                    }
                 }
-
-                File.Delete(this.actionPath);
             }
             catch (Exception ex)
             {

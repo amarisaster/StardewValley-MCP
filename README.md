@@ -148,18 +148,26 @@ stardew-mcp-bridge/
 ```
 
 
-## Notes (v0.2.0)
+## Notes (v0.2.1)
 
 Recent fixes and improvements:
 
-- **Farm mode freeze fix** — Companions no longer get permanently stuck when pathfinding stalls. Stuck detection (2s threshold) auto-retargets to the next task.
-- **Mine mode ladder descent** — Companions actually descend mine levels now instead of just standing near ladders.
-- **Fishing timeout** — Fishing no longer hangs forever on a bad cast. Auto-resets after ~5 seconds with no bite.
-- **Crash isolation** — One companion crashing no longer freezes all companions. Each ticks independently with error recovery.
-- **Shadow farmer sync** — Shadow farmer syncs position from the visible NPC every tick, preventing desync drift.
-- **Day transition safety** — Companions in mines/dungeons at day end are warped to the farm. Mode resets to Follow on new day.
-- **Atomic file writes** — MCP server writes actions to a temp file then renames, preventing the SMAPI mod from reading partial JSON.
-- **Input validation** — MCP tools with required arguments now validate before sending, returning clear error messages.
+- **AI tick rate fix** — AI now runs at 60 ticks/sec (was throttled to 2/sec). Combat, pathfinding, and stuck detection are responsive now.
+- **Atomic file writes (both directions)** — Both SMAPI and MCP use temp-file-then-rename, preventing partial JSON reads.
+- **Action file race fix** — SMAPI deletes the action file before processing, so new MCP commands are never lost.
+- **Fishing rod lifecycle** — Rod state machine is ticked each frame during fishing, so nibble detection actually works.
+- **Single-tile actions** — stardew_action tool now works: water, harvest, clear, hoe route to actual game logic.
+- **WarpTo clears pathfinding** — Warping clears stale PathFindController references.
+- **Debris drops resources** — Clearing debris calls performRemoveAction() so items actually drop.
+- **Storm weather** — Bridge data reports thunderstorms separately from rain.
+- **Farm mode freeze fix** — Stuck detection (2s) auto-retargets to the next task.
+- **Mine mode ladder descent** — Companions actually descend mine levels.
+- **Fishing timeout** — Auto-resets after ~5 seconds with no bite.
+- **Crash isolation** — Per-companion error recovery in tick loop.
+- **Shadow farmer sync** — Syncs from NPC every tick, preventing desync.
+- **Day transition safety** — Warps from mines at day end, resets mode to Follow.
+- **Input validation** — MCP tools validate required arguments before sending.
+- **Dead code cleanup** — Removed unused GoToBed, MoveTowardPosition, Rest methods.
 
 ## License
 

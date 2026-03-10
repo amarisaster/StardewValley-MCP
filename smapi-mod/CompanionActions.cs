@@ -65,6 +65,7 @@ namespace StardewMCPBridge
                     || obj.ParentSheetIndex == 294 || obj.ParentSheetIndex == 295
                     || obj.ParentSheetIndex == 343 || obj.ParentSheetIndex == 450)
                 {
+                    obj.performRemoveAction();
                     location.objects.Remove(tile);
                     monitor.Log($"Cleared debris at ({tile.X}, {tile.Y}): {name}", LogLevel.Trace);
                     return true;

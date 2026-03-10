@@ -153,7 +153,7 @@ namespace StardewMCPBridge
                     return;
                 }
 
-                // Stuck detection: if we haven't moved in 60 ticks (~1s), give up on this target
+                // Stuck detection: if we haven't moved in 120 ticks (~2s), give up on this target
                 if (Vector2.Distance(this.npc.Position, this.lastPosition) < 1f)
                     this.stuckTicks++;
                 else
@@ -224,7 +224,6 @@ namespace StardewMCPBridge
 
         private void DoMine()
         {
-            this.Companion.SyncFromNpc();
             var location = this.npc.currentLocation ?? Game1.player?.currentLocation;
             if (location == null) return;
 
@@ -319,9 +318,10 @@ namespace StardewMCPBridge
         {
             this.WarpToPlayerIfNeeded();
 
-            // If currently fishing, check for nibble
+            // If currently fishing, tick the rod's state machine and check for nibble
             if (this.isFishing)
             {
+                this.Companion.TickFishingRod();
                 if (this.Companion.CheckAndHookFish())
                 {
                     this.isFishing = false;
@@ -367,7 +367,8 @@ namespace StardewMCPBridge
 
         private Vector2? FindNearestWaterTile()
         {
-            var location = this.npc.currentLocation ?? Game1.player.currentLocation;
+            var location = this.npc.currentLocation ?? Game1.player?.currentLocation;
+            if (location == null) return null;
             var myTile = this.npc.Tile;
             float nearestDist = float.MaxValue;
             Vector2? nearest = null;
