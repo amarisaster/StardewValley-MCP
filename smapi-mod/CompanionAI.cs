@@ -23,7 +23,7 @@ namespace StardewMCPBridge
 
     /// <summary>
     /// AI behavior system for autonomous companion play.
-    /// Decides what to do each tick based on current mode and environment.
+    /// Drives the visible NPC; shadow farmer handles game mechanics.
     /// </summary>
     public class CompanionAI
     {
@@ -37,6 +37,8 @@ namespace StardewMCPBridge
         private int pathCooldown = 0;
         private Vector2? currentTarget = null;
         private bool isFishing = false;
+        private int stuckTicks = 0;
+        private Vector2 lastPosition = Vector2.Zero;
 
         public CompanionAI(CompanionFarmer companionFarmer, IMonitor monitor)
         {
@@ -82,17 +84,37 @@ namespace StardewMCPBridge
             var botPos = this.npc.Tile;
             float distance = Vector2.Distance(playerPos, botPos);
 
+            // Too far — teleport near player instead of pathfinding
+            if (distance > 10)
+            {
+                var offset = this.Companion.Name == "Companion2" ? new Vector2(64, 0) : new Vector2(-64, 0);
+                this.npc.Position = Game1.player.Position + offset;
+                this.npc.controller = null;
+                this.Companion.SyncFromNpc();
+                this.monitor.Log($"{this.Companion.Name}: Teleported near player (was {distance:F1} tiles away)", LogLevel.Debug);
+                return;
+            }
+
             if (distance > 3 && this.pathCooldown <= 0)
             {
                 try
                 {
                     var offset = this.Companion.Name == "Companion2" ? 1 : -1;
+                    var targetPoint = new Point((int)playerPos.X + offset, (int)playerPos.Y);
                     this.npc.controller = new PathFindController(
-                        this.npc, Game1.currentLocation,
-                        new Point((int)playerPos.X + offset, (int)playerPos.Y), 2);
-                    this.pathCooldown = 30;
+                        this.npc, this.npc.currentLocation,
+                        targetPoint, 2);
+                    this.pathCooldown = 4;
                 }
-                catch { }
+                catch
+                {
+                    // Pathfinding failed — teleport close
+                    var offset = this.Companion.Name == "Companion2" ? new Vector2(64, 0) : new Vector2(-64, 0);
+                    this.npc.Position = Game1.player.Position + offset;
+                    this.npc.controller = null;
+                    this.Companion.SyncFromNpc();
+                    this.pathCooldown = 4;
+                }
             }
 
             if (this.pathCooldown > 0) this.pathCooldown--;
@@ -120,9 +142,30 @@ namespace StardewMCPBridge
                     // Execute the task at this tile
                     this.ExecuteFarmAction(location, this.currentTarget.Value);
                     this.currentTarget = null;
+                    this.stuckTicks = 0;
                     this.actionCooldown = 15; // brief pause between actions
+                    return;
                 }
-                return;
+
+                // Stuck detection: if we haven't moved in 60 ticks (~1s), give up on this target
+                if (Vector2.Distance(this.npc.Position, this.lastPosition) < 1f)
+                    this.stuckTicks++;
+                else
+                    this.stuckTicks = 0;
+                this.lastPosition = this.npc.Position;
+
+                if (this.stuckTicks > 60)
+                {
+                    this.monitor.Log($"{this.Companion.Name}: Stuck heading to ({this.currentTarget.Value.X},{this.currentTarget.Value.Y}), retargeting", LogLevel.Debug);
+                    this.currentTarget = null;
+                    this.npc.controller = null;
+                    this.stuckTicks = 0;
+                    // Fall through to rescan for tasks
+                }
+                else
+                {
+                    return;
+                }
             }
 
             // Find next task
@@ -216,7 +259,6 @@ namespace StardewMCPBridge
             }
 
             // Priority 3: Find ladder/shaft to go deeper
-            // Look for ladder tiles
             foreach (var pair in location.objects.Pairs)
             {
                 if (pair.Value.Name != null &&
@@ -225,7 +267,6 @@ namespace StardewMCPBridge
                     float dist = Vector2.Distance(this.npc.Tile, pair.Key);
                     if (dist <= 1.5f)
                     {
-                        // Touch the ladder to go down
                         this.monitor.Log($"{this.Companion.Name}: Found ladder at ({pair.Key.X},{pair.Key.Y})", LogLevel.Info);
                     }
                     else
@@ -342,9 +383,14 @@ namespace StardewMCPBridge
             {
                 var location = this.npc.currentLocation ?? Game1.currentLocation;
                 this.npc.controller = new PathFindController(this.npc, location, target, 2);
-                this.pathCooldown = 15;
+                this.pathCooldown = 4;
             }
-            catch { }
+            catch
+            {
+                // Pathfinding failed — teleport to target
+                this.npc.Position = new Vector2(target.X * 64f, target.Y * 64f);
+                this.pathCooldown = 4;
+            }
         }
 
         private bool IsInCombatArea()
