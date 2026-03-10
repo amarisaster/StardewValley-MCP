@@ -144,7 +144,7 @@ namespace StardewMCPBridge
                     time = Game1.timeOfDay,
                     day = Game1.dayOfMonth,
                     season = Game1.currentSeason,
-                    weather = Game1.isLightning ? "storm" : Game1.isRaining ? "rain" : Game1.isSnowing ? "snow" : "sunny",
+                    weather = Game1.isLightning ? "storm" : Game1.isRaining ? "rain" : Game1.isSnowing ? "snow" : Game1.isDebrisWeather ? "windy" : "sunny",
                     location = Game1.currentLocation?.Name,
                     player = new
                     {

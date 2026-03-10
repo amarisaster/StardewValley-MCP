@@ -394,10 +394,15 @@ namespace StardewMCPBridge
                     case "face_direction":
                     {
                         int dir = root.GetProperty("direction").GetInt32(); // 0=up,1=right,2=down,3=left
+                        if (dir < 0 || dir > 3)
+                        {
+                            detail = $"Invalid direction: {dir} (must be 0-3)";
+                            break;
+                        }
                         companion.Visual.FacingDirection = dir;
                         companion.Shadow.FacingDirection = dir;
                         success = true;
-                        detail = $"Facing {new[] { "up", "right", "down", "left" }[dir % 4]}";
+                        detail = $"Facing {new[] { "up", "right", "down", "left" }[dir]}";
                         break;
                     }
 
@@ -551,6 +556,15 @@ namespace StardewMCPBridge
                                 // Fall back to direct stamina/health restoration
                                 companion.Shadow.Stamina = Math.Min(companion.Shadow.MaxStamina, companion.Shadow.Stamina + food.Edibility);
                                 companion.Shadow.health = Math.Min(companion.Shadow.maxHealth, companion.Shadow.health + (int)(food.Edibility * 0.4f));
+
+                                // Consume the food item (eatObject normally handles this)
+                                food.Stack--;
+                                if (food.Stack <= 0)
+                                {
+                                    int idx = items.IndexOf(food);
+                                    if (idx >= 0) items[idx] = null;
+                                }
+
                                 success = true;
                                 detail = $"Ate {food.DisplayName} (manual restore, eatObject failed: {eatEx.Message})";
                             }

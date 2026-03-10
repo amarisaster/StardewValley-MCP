@@ -192,9 +192,10 @@ namespace StardewMCPBridge
             var tasks = CompanionActions.ScanForTasks(location, this.monitor);
             if (tasks.Count == 0) return;
 
-            // Pick nearest task
+            // Pick best task: highest priority first, then nearest within same priority
             var myTile = this.npc.Tile;
-            var nearest = tasks.OrderBy(t => Vector2.Distance(myTile, t.Tile)).First();
+            var nearest = tasks.OrderByDescending(t => t.Priority)
+                .ThenBy(t => Vector2.Distance(myTile, t.Tile)).First();
             this.currentTarget = nearest.Tile;
 
             // Path to it
@@ -229,7 +230,14 @@ namespace StardewMCPBridge
                 }
             }
 
-            CompanionActions.ClearDebris(location, tile, this.monitor);
+            // Use tools for debris so loot drops properly (stone→pickaxe, twigs/weeds→axe)
+            if (location.objects.TryGetValue(tile, out var obj) && obj.Name != null)
+            {
+                if (obj.Name.Contains("Stone"))
+                    this.Companion.UseToolAt(tile, typeof(Pickaxe));
+                else
+                    this.Companion.UseToolAt(tile, typeof(Axe));
+            }
         }
 
         // ====================
