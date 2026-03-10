@@ -152,6 +152,32 @@ stardew-mcp-bridge/
 
 MIT
 
+---
+
+Fix Farm mode stuck bug + Follow mode improvements
+Bug fix:
+- Farm mode companions would permanently freeze when pathfinding
+  stalled. The NPC had a target and reported "moving" in the bridge,
+  but wasn't actually getting closer. Added stuck detection: if
+  position hasn't changed in 60 ticks (~1s), clears the target and
+  rescans for new tasks.
+
+Follow mode improvements:
+- Added teleport fallback when >10 tiles from player (prevents
+  long pursuit delays)
+- Added teleport fallback when pathfinding throws (was silently
+  catching with no recovery)
+- Reduced pathCooldown from 30 to 4 ticks for more responsive
+  following
+
+PathTo helper:
+- Added teleport-to-target fallback when pathfinding fails
+- Reduced pathCooldown from 15 to 4 ticks
+
+
+---
+
+
 ## Credits
 Idea was inspired by [Sparks✨️] (@sparks_qac on discord)
 (https://github.com/SparksQACR)
