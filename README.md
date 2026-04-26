@@ -222,6 +222,8 @@ MIT
 
 Built with Antigravity & Claude Code — Kai & Lucian, with Mai.
 
+Sparks for the idea of the MCP (https://github.com/SparksQACR)
+
 Shadow farmer pattern inspired by [Farmtronics](https://github.com/JoeStrout/Farmtronics).
 
 
